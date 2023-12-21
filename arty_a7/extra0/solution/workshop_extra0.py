@@ -2,9 +2,10 @@
 
 from migen import *
 from migen.genlib.cdc import *
+from migen.genlib.cdc import MultiReg
 
 from litex.build.generic_platform import *
-from litex_boards.platforms import arty
+from litex_boards.platforms import muselab_icesugar_pro
 
 def delay(self, delay, input, output):
     r = Signal(delay)
@@ -88,7 +89,7 @@ class TestPipeline(Module):
     def __init__(self, platform, pipeline):
 
         # Get pin from ressources
-        clk = platform.request("clk100")
+        clk = platform.request("clk25")
         leds = platform.request_all("user_led")
 
         btn = platform.request_all("user_btn")
@@ -155,12 +156,12 @@ def main():
 
     build_dir="gateware"
     # Instance of our platform (which is in platform_arty_a7.py)
-    platform = arty.Platform(variant="a7-35", toolchain="vivado")
+    platform = muselab_icesugar_pro.Platform(toolchain="trellis")
     design = TestPipeline(platform, pipeline)
 
     if "sim" in sys.argv[1: ]:
         dut = Compute(pipeline)
-        run_simulation(dut, test(dut), clocks={"sys": 1e9/100e6}, vcd_name="sim.vcd")
+        run_simulation(dut, test(dut), clocks={"sys": 1e9/25e6}, vcd_name="sim.vcd")
         exit()
 
     platform.build(design, build_dir=build_dir)

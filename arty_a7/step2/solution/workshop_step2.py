@@ -113,6 +113,9 @@ def main():
     from litex.build.generic_platform import Pins, IOStandard
     platform.add_extension([("do", 0, Pins("B7"), IOStandard("LVCMOS33"))])
 
+    design = Tuto(platform)
+    platform.build(design, build_dir=build_dir)
+
     if "load" in sys.argv[1: ]:
         prog = platform.create_programmer()
         prog.load_bitstream(build_dir + "/top.bit")
@@ -123,8 +126,7 @@ def main():
         run_simulation(ring, test(), clocks={"sys": 1e9/100e6}, vcd_name="sim.vcd")
         exit()
 
-    design = Tuto(platform)
-    platform.build(design, build_dir=build_dir)
+    
 
 if __name__ == "__main__":
     main()
