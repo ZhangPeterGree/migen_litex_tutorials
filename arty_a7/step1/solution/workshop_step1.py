@@ -32,7 +32,7 @@ class Tuto(Module):
         crg = CRG(platform)
         self.submodules += crg
 
-        led = platform.request("user_led", 1)
+        led = platform.request("user_led_n", 0)
         blink = Blink(24)
         self.submodules += blink
         self.comb += led.eq(blink.out)
@@ -105,7 +105,7 @@ def main():
     platform = Platform(toolchain="trellis")
 
     from litex.build.generic_platform import Pins, IOStandard
-    platform.add_extension([("do", 0, Pins("M2"), IOStandard("LVCMOS33"))])
+    platform.add_extension([("do", 0, Pins("P12"), IOStandard("LVCMOS33"))])
     
     design = Tuto(platform)
     platform.build(design, build_dir=build_dir)

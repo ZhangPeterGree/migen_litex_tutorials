@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from enum import IntEnum
 
 from migen import *
@@ -97,7 +98,7 @@ class RingSerialCtrl(Module):
         led = Signal(12)
 
         # Timings.
-        trst = int(75e-6 * sys_clk_freq)
+        trst = int(25e-6 * sys_clk_freq)
         t0h = int(0.40e-6 * sys_clk_freq)
         t0l = int(0.85e-6 * sys_clk_freq)
         t1h = int(0.80e-6 * sys_clk_freq)

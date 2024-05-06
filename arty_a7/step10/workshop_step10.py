@@ -8,7 +8,7 @@ from migen.genlib.resetsync import AsyncResetSynchronizer
 from litex.soc.integration.soc_core import *
 from litex.soc.integration.builder import *
 
-from litex_boards.platforms import arty
+from litex_boards.platforms import muselab_icesugar_pro
 from ring import *
 
 # CRG ----------------------------------------------------------------------------------------------

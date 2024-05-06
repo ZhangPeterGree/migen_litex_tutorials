@@ -11,20 +11,31 @@ from litex_boards.platforms.muselab_icesugar_pro import *
 
 
 class Blink(Module):
-    def __init__(self, bit):
+    def __init__(self, bit=24):
         # This signal, declared as a attribute of the class
         # can be accessed from outside the module.
         self.out_r = Signal()
         self.out_g = Signal()
         self.out_b = Signal()
+        self.led = Signal()
+        # self.bit = Signal()
 
         # Internal signal
-        counter = Signal(25)
+        counter = Signal(bit+1)
+        
 
         # This is the actual counter. It is incremented each clock cycle.
         # Because it's not just only wires, it needs some memory (registers)
         # it has to be in a synchronous block.
         self.sync += counter.eq(counter + 1)
+        
+        
+                                 
+        self.sync += If(counter == 0,
+                        self.led.eq(~self.led),
+                        )
+        
+                     
 
         # Combinatorial assignments can be seen as wires.
         # Here we connect a bit of the counter to the self.out signal
@@ -32,14 +43,22 @@ class Blink(Module):
         self.comb += self.out_g.eq(counter[bit-2])
         self.comb += self.out_b.eq(counter[bit-4])
         
+        # self.comb += self.cnt.eq()
+        
 class Tuto(Module):
     def __init__(self, platform):
 
         # Get pin from ressources
         clk = platform.request("clk25")
-        led_r = platform.request("user_led", 0)
-        led_g = platform.request("user_led", 1)
-        led_b = platform.request("user_led", 2)
+        led_r = platform.request("user_led_n", 0)
+        led_g = platform.request("user_led_n", 1)
+        led_b = platform.request("user_led_n", 2)
+        
+        real_led_r = platform.request("real_led_n", 0)
+        real_led_g = platform.request("real_led_n", 1)
+        real_led_b = platform.request("real_led_n", 2)
+        
+        test_pin = platform.request("led_test", 0)
 
         # Creates a "sys" clock domain and generates a startup reset
         crg = CRG(clk)
@@ -51,6 +70,12 @@ class Tuto(Module):
         self.comb += led_r.eq(blink.out_r)
         self.comb += led_g.eq(blink.out_g)
         self.comb += led_b.eq(blink.out_b)
+        
+        self.comb += real_led_r.eq(blink.out_r)
+        self.comb += real_led_g.eq(blink.out_g)
+        self.comb += real_led_b.eq(blink.out_b)
+        
+        self.comb += test_pin.eq(blink.led)
 
         # Add a timing constraint
         platform.add_period_constraint(clk, 1e9/25e6)
@@ -59,7 +84,7 @@ class Tuto(Module):
 
 def test():
     loop = 0
-    while (loop < 1000000000000):
+    while (loop < 1000000):
         yield
         loop = loop + 1
 

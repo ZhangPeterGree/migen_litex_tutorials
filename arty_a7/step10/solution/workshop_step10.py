@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-
 from migen import *
 from migen.genlib.resetsync import AsyncResetSynchronizer
 
@@ -11,14 +10,14 @@ from litex.soc.integration.builder import *
 from litex_boards.platforms import muselab_icesugar_pro
 from ring import *
 
-# CRG ------------------------------------------------------------------------
+# CRG ------------clock request generate------------------------------------------------------------
 
 
 class CRG(Module):
     def __init__(self, platform, sys_clk_freq):
         self.rst = Signal()
         self.clock_domains.cd_sys = ClockDomain()
-
+        
         # # #
 
         clk = platform.request("clk25")
@@ -33,12 +32,14 @@ class CRG(Module):
 
 
 class BaseSoC(SoCCore):
-    def __init__(self, sys_clk_freq=int(25e6), mode=mode.DOUBLE, **kwargs):
+    def __init__(self, sys_clk_freq=int(25e6), mode=mode.SINGLE, **kwargs):
 
         platform = muselab_icesugar_pro.Platform(toolchain="trellis")
 
         from litex.build.generic_platform import Pins, IOStandard
-        platform.add_extension([("do", 0, Pins("B7"), IOStandard("LVCMOS33"))])
+        # platform.add_extension([("do", 0, Pins("P11"), IOStandard("LVCMOS33"))])
+        platform.add_extension(
+            [("do", 0, Pins("P11"), IOStandard("LVCMOS33"))])
 
         SoCCore.__init__(self, platform, sys_clk_freq,
                          ident="Muselab IceSugar Pro device LFE5U-25F-6BG256C",
@@ -46,10 +47,12 @@ class BaseSoC(SoCCore):
                          )
 
         self.submodules.crg = CRG(platform, sys_clk_freq)
+        # self.add_uart(name="uart", uart_name="serial", baudrate=115200)
 
         led = RingControl(platform.request("do"), mode, 12, sys_clk_freq)
         self.submodules.ledring = led
         self.add_csr("ledring")
+
 
 # Build -----------------------------------------------------------------------
 

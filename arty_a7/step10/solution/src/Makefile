@@ -1,4 +1,4 @@
-BUILD_DIR?=../build/digilent_arty/
+BUILD_DIR?=../build/muselab_icesugar_pro/
 
 include $(BUILD_DIR)/software/include/generated/variables.mak
 include $(SOC_DIRECTORY)/software/common.mak

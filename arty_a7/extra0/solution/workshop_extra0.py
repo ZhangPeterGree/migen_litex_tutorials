@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
+import argparse
 
 from migen import *
 from migen.genlib.cdc import *
@@ -104,6 +106,7 @@ class TestPipeline(Module):
             self.specials += MultiReg(sw[i], sw_sync[i])
 
         # Creates a "sys" clock domain and generates a startup reset
+        # Clock Reset Generator (CRG)
         crg = CRG(clk)
         self.submodules.crg = crg
 
@@ -149,22 +152,39 @@ def test(dut):
 # Build -------------------------------------------------------------------------------------------
 
 def main():
+    parser = argparse.ArgumentParser(description="The Muselab IceSugar Pro PCB and IOs have been documented by @wuxx")
+    
+    parser.add_argument("--build", action="store_true", help="Build bitstream")
+    parser.add_argument("--sim",  action="store_true", help="Build bitstream")
+    parser.add_argument("--load",  action="store_true", help="Load bitstream")
+    
 
+    args = parser.parse_args()
+    
     pipeline = False
-    if "pipe" in sys.argv[1: ]:
-        pipeline = True
+    # if args.pipe:
+    #     pipeline = True
 
     build_dir="gateware"
     # Instance of our platform (which is in platform_arty_a7.py)
     platform = muselab_icesugar_pro.Platform(toolchain="trellis")
     design = TestPipeline(platform, pipeline)
-
-    if "sim" in sys.argv[1: ]:
+    
+    if args.build:
+        prog = platform.build(design, build_dir=build_dir)
+        
+    if args.sim:
+        pipeline = True
         dut = Compute(pipeline)
         run_simulation(dut, test(dut), clocks={"sys": 1e9/25e6}, vcd_name="sim.vcd")
         exit()
 
-    platform.build(design, build_dir=build_dir)
+    if args.load:
+        # prog.load_bitstream("gateware" + "/top.bit")
+        # exit()
+        prog = platform.create_programmer()
+        prog.load_bitstream(build_dir.get_bitstream_filename("top.bit"))
+        exit()
 
 if __name__ == "__main__":
     main()
